@@ -1,0 +1,86 @@
+# ------------------------------------------------------------
+# BankAccount API – HTTP test suite
+# Requires: VS Code "REST Client" extension or JetBrains HTTP Client
+# ------------------------------------------------------------
+
+@baseUrl = http://localhost:5287
+# @baseUrl = https://localhost:5001
+
+### Health check (Swagger HTML)
+GET {{baseUrl}}/swagger/index.html
+
+### List accounts (empty at start)
+# @name listBefore
+GET {{baseUrl}}/api/accounts
+Accept: application/json
+
+### Create account
+# @name createAccount
+POST {{baseUrl}}/api/accounts
+Content-Type: application/json
+Accept: application/json
+
+{
+  "ownerName": "Anna Smith",
+  "initialDeposit": 100.00
+}
+
+### Capture created account id from response
+# The REST Client allows referencing prior responses:
+# {{createAccount.response.body.$.id}}
+# We'll reuse it below.
+
+### Get account by id
+# @name getById
+GET {{baseUrl}}/api/accounts/{{createAccount.response.body.$.id}}
+Accept: application/json
+
+### Deposit money
+# @name deposit50
+POST {{baseUrl}}/api/accounts/{{createAccount.response.body.$.id}}/deposit
+Content-Type: application/json
+Accept: application/json
+
+{
+  "amount": 50.00
+}
+
+### Withdraw money
+# @name withdraw30
+POST {{baseUrl}}/api/accounts/{{createAccount.response.body.$.id}}/withdraw
+Content-Type: application/json
+Accept: application/json
+
+{
+  "amount": 30.00
+}
+
+### List accounts (after ops)
+# @name listAfter
+GET {{baseUrl}}/api/accounts
+Accept: application/json
+
+### Negative test: deposit non-positive amount (should 400)
+# @name depositInvalid
+POST {{baseUrl}}/api/accounts/{{createAccount.response.body.$.id}}/deposit
+Content-Type: application/json
+Accept: application/json
+
+{
+  "amount": 0
+}
+
+### Negative test: withdraw more than balance (should 400)
+# @name withdrawTooMuch
+POST {{baseUrl}}/api/accounts/{{createAccount.response.body.$.id}}/withdraw
+Content-Type: application/json
+Accept: application/json
+
+{
+  "amount": 999999
+}
+
+### Not found test: random id
+# @name getRandom
+GET {{baseUrl}}/api/accounts/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+Accept: application/json

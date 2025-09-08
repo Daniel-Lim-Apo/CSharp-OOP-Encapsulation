@@ -1,6 +1,0 @@
-@oop_encapsulation_HostAddress = http://localhost:5287
-
-GET {{oop_encapsulation_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
